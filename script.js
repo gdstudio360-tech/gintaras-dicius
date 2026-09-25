@@ -1,4 +1,3 @@
-
 // Automatic language redirect (runs only on first visit)
 (function(){
   try{
@@ -25,6 +24,28 @@ document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
 
 const countObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(!entry.isIntersecting)return;const el=entry.target,end=Number(el.dataset.count);let n=0;const step=Math.max(1,Math.ceil(end/25));const timer=setInterval(()=>{n=Math.min(end,n+step);el.textContent=n;if(n===end)clearInterval(timer)},120);countObserver.unobserve(el)}),{threshold:.8});
 document.querySelectorAll('.count').forEach(el=>countObserver.observe(el));
+
+// Contact reveal: the complete phone numbers and email address are not present in the HTML.
+// They are reconstructed only after a visitor clicks a contact link.
+const contactData={
+  'lt-phone':{type:'tel',codes:[43,51,55,48,32,54,54,49,32,57,48,49,53,48]},
+  'uk-phone':{type:'tel',codes:[43,52,52,32,55,53,54,49,32,52,51,48,52,55,49]},
+  'email':{type:'mail',codes:[103,100,115,116,117,100,105,111,51,54,48,64,103,109,97,105,108,46,99,111,109]}
+};
+const decodeContact=codes=>String.fromCharCode(...codes);
+document.querySelectorAll('[data-contact]').forEach(link=>{
+  link.addEventListener('click',e=>{
+    if(link.dataset.revealed==='1') return;
+    e.preventDefault();
+    const item=contactData[link.dataset.contact];
+    if(!item) return;
+    const value=decodeContact(item.codes);
+    const strong=link.querySelector('strong');
+    if(strong) strong.textContent=value;
+    link.href=item.type==='tel'?'tel:'+value.replace(/\s+/g,''):'mailto:'+value;
+    link.dataset.revealed='1';
+  });
+});
 
 const modal=document.querySelector('#gallery-modal'),modalImage=document.querySelector('#modal-image'),modalTitle=document.querySelector('#modal-title'),counter=document.querySelector('#modal-counter'),thumbs=document.querySelector('#modal-thumbs'),prev=document.querySelector('.modal-nav.prev'),next=document.querySelector('.modal-nav.next');
 let gallery=[],current=0;
